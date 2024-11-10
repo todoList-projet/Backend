@@ -1,11 +1,11 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
 
-const Status = sequelize.define('Status', {
-    status_label: {
+const TypeTask = sequelize.define('TypeTask', {
+    name: {
         type: DataTypes.STRING,
         allowNull: false,
     },
 });
 
-module.exports = Status;
+module.exports = TypeTask;
