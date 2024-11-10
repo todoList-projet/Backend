@@ -6,6 +6,8 @@ const TypeTask = sequelize.define('TypeTask', {
         type: DataTypes.STRING,
         allowNull: false,
     },
+}, {
+    tableName: 'type_task'
 });
 
 module.exports = TypeTask;

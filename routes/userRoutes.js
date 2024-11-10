@@ -2,20 +2,11 @@ const express = require('express');
 const userController = require('../controllers/userController');
 const router = express.Router();
 
-/**
- * @swagger
- * /users:
- *   get:
- *     summary: Retrieve a list of users
- *     responses:
- *       200:
- *         description: A list of users
- */
-router.get('/', userController.getAllUsers);
+
 
 /**
  * @swagger
- * /users:
+ * /api/users:
  *   post:
  *     summary: Create a new user
  *     responses:
@@ -26,7 +17,18 @@ router.post('/', userController.createUser);
 
 /**
  * @swagger
- * /users/{id}:
+ * /api/users:
+ *   get:
+ *     summary: Retrieve a list of users
+ *     responses:
+ *       200:
+ *         description: A list of users
+ */
+router.get('/', userController.getAllUsers);
+
+/**
+ * @swagger
+ * /api/users/{id}:
  *   get:
  *     summary: Retrieve a single user by ID
  *     parameters:
@@ -43,7 +45,7 @@ router.get('/:id', userController.getUserById);
 
 /**
  * @swagger
- * /users/{id}:
+ * /api/users/{id}:
  *   put:
  *     summary: Update a user by ID
  *     parameters:
@@ -60,7 +62,7 @@ router.put('/:id', userController.updateUser);
 
 /**
  * @swagger
- * /users/{id}:
+ * /api/users/{id}:
  *   delete:
  *     summary: Delete a user by ID
  *     parameters:

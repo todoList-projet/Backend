@@ -6,6 +6,8 @@ const Status = sequelize.define('Status', {
         type: DataTypes.STRING,
         allowNull: false,
     },
+}, {
+    tableName: 'status'
 });
 
 module.exports = Status;

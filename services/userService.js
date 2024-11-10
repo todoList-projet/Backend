@@ -8,8 +8,7 @@ const createUser = async (userData) => {
     if (existingUser) {
         throw new AlreadyExistError('User with this email');
     }
-
-    const user = await User.create(userData);
+    await User.create(userData);
     return new ModelSuccessMessage('User', userData.first_name, 'created' );
 };
 

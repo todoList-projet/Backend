@@ -1,10 +1,10 @@
-const taskService = require('../services/taskService');
+const groupService = require('../services/groupService');
 const { CustomError } = require('../utils/errors');
 
-const createTask = async (req, res) => {
+const createGroup = async (req, res) => {
     try {
-        const task = await taskService.createTask(req.body);
-        res.status(201).json(task);
+        const group = await groupService.createGroup(req.body);
+        res.status(201).json(group);
     } catch (err) {
         if (err instanceof CustomError) {
             res.status(err.statusCode).json({ error: err.message });
@@ -15,19 +15,19 @@ const createTask = async (req, res) => {
     }
 };
 
-const getAllTasks = async (req, res) => {
+const getAllGroups = async (req, res) => {
     try {
-        const tasks = await taskService.getAllTasks();
-        res.status(200).json(tasks);
+        const groups = await groupService.getAllGroups();
+        res.status(200).json(groups);
     } catch (err) {
         res.status(500).json({ error: 'An unexpected error occurred' });
     }
 };
 
-const getTaskById = async (req, res) => {
+const getGroupById = async (req, res) => {
     try {
-        const task = await taskService.getTaskById(req.params.id);
-        res.status(200).json(task);
+        const group = await groupService.getGroupById(req.params.id);
+        res.status(200).json(group);
     } catch (err) {
         if (err instanceof CustomError) {
             res.status(err.statusCode).json({ error: err.message });
@@ -37,10 +37,10 @@ const getTaskById = async (req, res) => {
     }
 };
 
-const updateTask = async (req, res) => {
+const updateGroup = async (req, res) => {
     try {
-        const updatedTask = await taskService.updateTask(req.params.id, req.body);
-        res.status(200).json(updatedTask);
+        const updatedGroup = await groupService.updateGroup(req.params.id, req.body);
+        res.status(200).json(updatedGroup);
     } catch (err) {
         if (err instanceof CustomError) {
             res.status(err.statusCode).json({ error: err.message });
@@ -50,9 +50,9 @@ const updateTask = async (req, res) => {
     }
 };
 
-const deleteTask = async (req, res) => {
+const deleteGroup = async (req, res) => {
     try {
-        const result = await taskService.deleteTask(req.params.id);
+        const result = await groupService.deleteGroup(req.params.id);
         res.status(200).json(result);
     } catch (err) {
         if (err instanceof CustomError) {
@@ -64,9 +64,9 @@ const deleteTask = async (req, res) => {
 };
 
 module.exports = {
-    createTask,
-    getAllTasks,
-    getTaskById,
-    updateTask,
-    deleteTask,
+    createGroup,
+    getAllGroups,
+    getGroupById,
+    updateGroup,
+    deleteGroup,
 };
