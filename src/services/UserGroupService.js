@@ -28,11 +28,8 @@ const assignUserToGroup = async (userId, groupId) => {
         }
 
         // Assign user to group
-        const query = 'INSERT INTO `User_Group` (`user_id`, `group_id`) VALUES (:userId, :groupId)';
-        await sequelize.query(query, {
-            replacements: { userId, groupId },
-            type: QueryTypes.INSERT
-        });
+        await user.addGroup(group);
+
         return { message: 'User assigned to group successfully' };
     } catch (error) {
         console.error('Error assigning user to group:', error);
@@ -40,6 +37,24 @@ const assignUserToGroup = async (userId, groupId) => {
     }
 };
 
+//get user groups
+const getUserGroups = async (userId) => {
+    try {
+        const user = await User.findByPk(userId);
+
+        if (!user) {
+            throw new Error('User not found');
+        }
+
+        const groups = await user.getGroups();
+        return groups;
+    } catch (error) {
+        console.error('Error getting user groups:', error);
+        throw error;
+    }
+};
+
 module.exports = {
-    assignUserToGroup
+    assignUserToGroup,
+    getUserGroups
 };
