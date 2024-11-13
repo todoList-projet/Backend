@@ -1,9 +1,13 @@
-const { DataTypes } = require('sequelize');
+// models/Task.js
+const { DataTypes, Model } = require('sequelize');
 const sequelize = require('../config/db');
-const Status = require('./Status');
 const TypeTask = require('./TypeTask');
+const Status = require('./StatusTask');
+const User = require("./User");
 
-const Task = sequelize.define('Task', {
+class Task extends Model {}
+
+Task.init({
     title: {
         type: DataTypes.STRING,
         allowNull: false,
@@ -24,23 +28,16 @@ const Task = sequelize.define('Task', {
         type: DataTypes.DATE,
         defaultValue: DataTypes.NOW,
     },
-    status_id: {
-        type: DataTypes.INTEGER,
-        references: {
-            model: Status,
-            key: 'id',
-        },
-    },
-    type_task_id: {
-        type: DataTypes.INTEGER,
-        references: {
-            model: TypeTask,
-            key: 'id',
-        },
-    },
+}, {
+    sequelize,
+    modelName: 'Task',
+    tableName: 'tasks',
 });
 
-Task.belongsTo(Status, { foreignKey: 'status_id' });
-Task.belongsTo(TypeTask, { foreignKey: 'type_task_id' });
+// Associations
+//Task.belongsTo(TypeTask, { foreignKey: 'typeTaskId', as: 'type' });
+//Task.belongsTo(Status, { foreignKey: 'statusId', as: 'status' });
+//Task.belongsToMany(User, { through: 'UserTask', as: 'users' });
+
 
 module.exports = Task;

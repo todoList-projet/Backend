@@ -2,20 +2,20 @@ const { DataTypes, Model } = require('sequelize');
 const sequelize = require('../config/db');
 const Task = require('./Task');
 
-class TypeTask extends Model {}
+class StatusTask extends Model {}
 
-TypeTask.init({
+StatusTask.init({
     name: {
         type: DataTypes.STRING,
         allowNull: false,
     }
 }, {
     sequelize,
-    modelName: 'TypeTask',
-    tableName: 'type_tasks',
+    modelName: 'Status',
+    tableName: 'status_tasks',
 });
 
 // Associations
-//TypeTask.hasMany(Task, { foreignKey: 'typeTaskId', as: 'tasks' });
+//StatusTask.hasMany(Task, { foreignKey: 'statusId', as: 'tasks' });
 
-module.exports = TypeTask;
+module.exports = StatusTask;

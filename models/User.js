@@ -1,7 +1,11 @@
-const { DataTypes } = require('sequelize');
+const { DataTypes, Model } = require('sequelize');
 const sequelize = require('../config/db');
+const Task = require('./Task');
+const Group = require('./Group');
 
-const User = sequelize.define('User', {
+class User extends Model {}
+
+User.init({
     first_name: {
         type: DataTypes.STRING,
         allowNull: false,
@@ -19,6 +23,14 @@ const User = sequelize.define('User', {
         type: DataTypes.STRING,
         allowNull: false,
     }
+}, {
+    sequelize,
+    modelName: 'User',
+    tableName: 'users',
 });
+
+// Associations
+User.belongsToMany(Task, { through: 'User_Task', as: 'tasks' });
+User.belongsToMany(Group, { through: 'User_Group', as: 'groups' });
 
 module.exports = User;
