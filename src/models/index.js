@@ -15,6 +15,11 @@ TypeTask.hasMany(Task, { foreignKey: 'typeTaskId', as: 'tasks' });
 StatusTask.hasMany(Task, { foreignKey: 'statusTaskId', as: 'tasks' });
 Group.belongsToMany(User, { through: 'UserGroup', as: 'users' });
 
+// Group.belongsToMany(User, { through: 'UserGroup', as: 'users' });
+// User.belongsToMany(Group, { through: 'UserGroup', as: 'groups' });
+
+
+
 module.exports = {
     sequelize,
     User,

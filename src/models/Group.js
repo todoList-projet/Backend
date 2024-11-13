@@ -8,6 +8,10 @@ Group.init({
     name: {
         type: DataTypes.STRING,
         allowNull: false,
+    },
+    nbUsers: {
+        type: DataTypes.INTEGER,
+        defaultValue: 0,
     }
 }, {
     sequelize,

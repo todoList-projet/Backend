@@ -1,9 +1,9 @@
 const express = require('express');
 const dotenv = require('dotenv');
-const sequelize = require('./config/db');
-const routes = require('./routes');
-const { specs, swaggerUi } = require('./config/swagger');
-const {insertDefaultStatuses, insertDefaultTypeTasks} = require("./utils/seedData");
+const sequelize = require('./src/config/db');
+const routes = require('./src/routes');
+const { specs, swaggerUi } = require('./src/config/swagger');
+const {insertDefaultStatuses, insertDefaultTypeTasks} = require("./src/utils/seedData");
 const PORT = process.env.PORT || 3006;
 
 dotenv.config();
@@ -20,7 +20,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
 sequelize.authenticate()
     .then(() => {
         console.log('Database connected...');
-        sequelize.sync({ alter: false }) // Crée ou met à jour les tables en fonction des modèles
+        sequelize.sync({ alter: true }) // Crée ou met à jour les tables en fonction des modèles
             .then(() => {
                 console.log('All tables have been synced successfully.');
                 // Insertions de données initiales
