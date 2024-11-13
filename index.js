@@ -20,7 +20,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
 sequelize.authenticate()
     .then(() => {
         console.log('Database connected...');
-        sequelize.sync({ alter: true }) // Crée ou met à jour les tables en fonction des modèles
+        sequelize.sync({ alter: false }) // Crée ou met à jour les tables en fonction des modèles
             .then(() => {
                 console.log('All tables have been synced successfully.');
                 // Insertions de données initiales

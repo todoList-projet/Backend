@@ -2,6 +2,7 @@ const express = require('express');
 const userRoutes = require('./userRoutes');
 const groupRoutes = require('./groupRoutes');
 const taskRoutes = require('./taskRoutes');
+const userGroupRoutes = require('./userGroupRoutes');
 
 const router = express.Router();
 
@@ -11,5 +12,7 @@ router.use('/users', userRoutes);
 router.use('/groups', groupRoutes);
 // Tasks routes
 router.use('/tasks', taskRoutes);
+// User_Group routes
+router.use('/assign', userGroupRoutes);
 
 module.exports = router;

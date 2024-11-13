@@ -20,6 +20,7 @@ Group.init({
 });
 
 // Associations
-//Group.belongsToMany(User, { through: 'UserGroup', as: 'users' });
-
+Group.associate = (models) => {
+    Group.belongsToMany(models.User, { through: 'User_Group', as: 'users' });
+};
 module.exports = Group;

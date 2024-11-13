@@ -15,6 +15,10 @@ TypeTask.init({
     tableName: 'type_tasks',
 });
 
+TypeTask.associate = (models) => {
+    TypeTask.hasMany(models.Task, { foreignKey: 'typeTaskId', as: 'tasks' });
+}
+
 // Associations
 //TypeTask.hasMany(Task, { foreignKey: 'typeTaskId', as: 'tasks' });
 

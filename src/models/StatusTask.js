@@ -15,6 +15,9 @@ StatusTask.init({
     tableName: 'status_tasks',
 });
 
+StatusTask.associate = (models) => {
+    StatusTask.hasMany(models.Task, { foreignKey: 'statusTaskId', as: 'tasks' });
+};
 // Associations
 //StatusTask.hasMany(Task, { foreignKey: 'statusId', as: 'tasks' });
 
