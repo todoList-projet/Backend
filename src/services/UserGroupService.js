@@ -1,5 +1,6 @@
 const { Group, User } = require('../models');
 const sequelize = require('../config/db');
+const { QueryTypes } = require('sequelize');
 
 
 const assignUserToGroup = async (userId, groupId) => {
@@ -13,10 +14,24 @@ const assignUserToGroup = async (userId, groupId) => {
             throw new Error('User or Group not found');
         }
 
-        const query = "INSERT INTO `User_Group` (`user_id`, `group_id`) VALUES (:userId, :groupId)";
+        // Check if the user is already in the group
+        const existingAssignment = await sequelize.query(
+            'SELECT * FROM `User_Group` WHERE `user_id` = :userId AND `group_id` = :groupId',
+            {
+                replacements: { userId, groupId },
+                type: QueryTypes.SELECT
+            }
+        );
+
+        if (existingAssignment.length > 0) {
+            return { message: 'User is already assigned to this group' };
+        }
+
+        // Assign user to group
+        const query = 'INSERT INTO `User_Group` (`user_id`, `group_id`) VALUES (:userId, :groupId)';
         await sequelize.query(query, {
             replacements: { userId, groupId },
-            type: sequelize.QueryTypes.INSERT
+            type: QueryTypes.INSERT
         });
         return { message: 'User assigned to group successfully' };
     } catch (error) {
