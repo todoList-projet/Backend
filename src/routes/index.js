@@ -13,6 +13,6 @@ router.use('/groups', groupRoutes);
 // Tasks routes
 router.use('/tasks', taskRoutes);
 // User_Group routes
-router.use('/assign', userGroupRoutes);
+router.use('/user_grp', userGroupRoutes);
 
 module.exports = router;

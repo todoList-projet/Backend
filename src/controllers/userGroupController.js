@@ -23,7 +23,20 @@ const getUserGroups = async (req, res) => {
     }
 };
 
+//get group users
+const getGroupUsers = async (req, res) => {
+    const { groupId } = req.params;
+
+    try {
+        const users = await UserGroupService.getGroupUsers(groupId);
+        res.status(200).json(users);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
 module.exports = {
     assignUserToGroup,
-    getUserGroups
+    getUserGroups,
+    getGroupUsers
 };

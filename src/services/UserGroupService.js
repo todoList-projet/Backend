@@ -46,7 +46,10 @@ const getUserGroups = async (userId) => {
             throw new Error('User not found');
         }
 
-        const groups = await user.getGroups();
+        const groups = await user.getGroups({
+            attributes: ['id', 'name'],
+            joinTableAttributes: []
+        });
         return groups;
     } catch (error) {
         console.error('Error getting user groups:', error);
@@ -54,7 +57,28 @@ const getUserGroups = async (userId) => {
     }
 };
 
+//get group users
+const getGroupUsers = async (groupId) => {
+    try {
+        const group = await Group.findByPk(groupId);
+
+        if (!group) {
+            throw new Error('Group not found');
+        }
+
+        const users = await group.getUsers({
+            attributes: ['id', 'first_name', 'last_name'],
+            joinTableAttributes: []
+        });
+        return users;
+    } catch (error) {
+        console.error('Error getting group users:', error);
+        throw error;
+    }
+};
+
 module.exports = {
     assignUserToGroup,
-    getUserGroups
+    getUserGroups,
+    getGroupUsers
 };
