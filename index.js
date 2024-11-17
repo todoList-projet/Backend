@@ -3,14 +3,18 @@ const dotenv = require('dotenv');
 const sequelize = require('./src/config/db');
 const routes = require('./src/routes');
 const { specs, swaggerUi } = require('./src/config/swagger');
+const passport = require('./src/config/passport');
+const authRoutes = require('./src/routes/authRoutes');
 const {insertDefaultStatuses, insertDefaultTypeTasks} = require("./src/utils/seedData");
 const PORT = process.env.PORT || 3006;
 
 dotenv.config();
 const app = express();
 app.use(express.json());
+app.use(passport.initialize());
 
 // Routes
+app.use('/auth', authRoutes);
 app.use('/api', routes);
 
 // Swagger UI

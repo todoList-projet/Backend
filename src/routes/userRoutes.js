@@ -1,31 +1,14 @@
 const express = require('express');
 const userController = require('../controllers/userController');
 const router = express.Router();
+const passport = require('../config/passport');
 
 
 
-/**
- * @swagger
- * /api/users:
- *   post:
- *     summary: Create a new user
- *     responses:
- *       201:
- *         description: User created successfully
- */
 router.post('/', userController.createUser);
 
-/**
- * @swagger
- * /api/users:
- *   get:
- *     summary: Retrieve a list of users
- *     responses:
- *       200:
- *         description: A list of users
- */
-router.get('/', userController.getAllUsers);
-
+//router.get('/', userController.getAllUsers);
+router.get('/', passport.authenticate('jwt', { session: false }), userController.getAllUsers);
 /**
  * @swagger
  * /api/users/{id}:
