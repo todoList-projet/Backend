@@ -36,7 +36,9 @@ Task.init({
 Task.associate = (models) => {
     Task.belongsTo(models.TypeTask, { foreignKey: 'typeTaskId', as: 'type' });
     Task.belongsTo(models.StatusTask, { foreignKey: 'statusTaskId', as: 'status' });
-    Task.belongsToMany(models.User, { through: 'User_Task', as: 'users' });
+    Task.belongsToMany(models.User, { through: 'Task_User', as: 'users' });
+    Task.belongsToMany(models.Group, { through: 'Task_Group', as: 'groups' });
+
 }
 // Associations
 //Task.belongsTo(TypeTask, { foreignKey: 'typeTaskId', as: 'type' });

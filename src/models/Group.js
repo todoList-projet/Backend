@@ -21,6 +21,7 @@ Group.init({
 
 // Associations
 Group.associate = (models) => {
-    Group.belongsToMany(models.User, { through: 'User_Group', as: 'users' });
+    Group.belongsToMany(models.User, { through: 'Group_User', as: 'users' });
+    Group.belongsToMany(models.Task, { through: 'Task_Group', as: 'tasks' });
 };
 module.exports = Group;
