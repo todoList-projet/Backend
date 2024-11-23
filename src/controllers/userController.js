@@ -24,6 +24,15 @@ const getAllUsers = async (req, res) => {
     }
 };
 
+const getAllUsersEmail = async (req, res) => {
+    try {
+        const users = await userService.getAllUsersEmail();
+        res.status(200).json(users);
+    } catch (err) {
+        res.status(500).json({ error: 'An unexpected error occurred' });
+    }
+}
+
 const getUserById = async (req, res) => {
     try {
         const user = await userService.getUserById(req.params.id);
@@ -65,6 +74,7 @@ const deleteUser = async (req, res) => {
 
 module.exports = {
     getAllUsers,
+    getAllUsersEmail,
     createUser,
     getUserById,
     updateUser,

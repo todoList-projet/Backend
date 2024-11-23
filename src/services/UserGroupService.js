@@ -16,7 +16,7 @@ const assignUserToGroup = async (userId, groupId) => {
 
         // Check if the user is already in the group
         const existingAssignment = await sequelize.query(
-            'SELECT * FROM `User_Group` WHERE `user_id` = :userId AND `group_id` = :groupId',
+            'SELECT * FROM `Group_User` WHERE `user_id` = :userId AND `group_id` = :groupId',
             {
                 replacements: { userId, groupId },
                 type: QueryTypes.SELECT
@@ -47,7 +47,7 @@ const getUserGroups = async (userId) => {
         }
 
         const groups = await user.getGroups({
-            attributes: ['id', 'name'],
+            attributes: ['id', 'name', 'description','nb_users'],
             joinTableAttributes: []
         });
         return groups;

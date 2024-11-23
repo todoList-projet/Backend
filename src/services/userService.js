@@ -15,6 +15,12 @@ const createUser = async (userData) => {
 const getAllUsers = async () => {
     return await User.findAll();
 };
+//get by id et names
+const getAllUsersEmail = async () => {
+    return await User.findAll({
+        attributes: ['id', 'email']
+    });
+};
 
 const getUserById = async (id) => {
     const user = await User.findByPk(id);
@@ -56,6 +62,7 @@ const deleteUser = async (id) => {
 module.exports = {
     createUser,
     getAllUsers,
+    getAllUsersEmail,
     getUserById,
     updateUser,
     deleteUser,

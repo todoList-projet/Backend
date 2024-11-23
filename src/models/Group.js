@@ -9,6 +9,10 @@ Group.init({
         type: DataTypes.STRING,
         allowNull: false,
     },
+    description : {
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
     nbUsers: {
         type: DataTypes.INTEGER,
         defaultValue: 0,

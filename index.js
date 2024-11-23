@@ -5,6 +5,7 @@ const routes = require('./src/routes');
 const { specs, swaggerUi } = require('./src/config/swagger');
 const passport = require('./src/config/passport');
 const authRoutes = require('./src/routes/authRoutes');
+const cors = require('cors');
 const {insertDefaultStatuses, insertDefaultTypeTasks} = require("./src/utils/seedData");
 const PORT = process.env.PORT || 3006;
 
@@ -12,6 +13,14 @@ dotenv.config();
 const app = express();
 app.use(express.json());
 app.use(passport.initialize());
+
+// Configure CORS
+const corsOptions = {
+    origin: 'http://localhost:3001', // Replace with your Next.js frontend URL
+    optionsSuccessStatus: 200
+};
+app.use(cors(corsOptions));
+
 
 // Routes
 app.use('/auth', authRoutes);

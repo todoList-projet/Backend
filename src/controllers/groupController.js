@@ -1,5 +1,20 @@
 const groupService = require('../services/groupService');
 const { CustomError } = require('../utils/errors');
+const {leaveGroup} = require("../services/groupService");
+
+// const createGroup = async (req, res) => {
+//     try {
+//         const group = await groupService.createGroup(req.body);
+//         res.status(201).json(group);
+//     } catch (err) {
+//         if (err instanceof CustomError) {
+//             res.status(err.statusCode).json({ error: err.message });
+//         } else {
+//             console.error(err.stack);
+//             res.status(500).json({ error: 'An unexpected error occurred' });
+//         }
+//     }
+// };
 
 const createGroup = async (req, res) => {
     try {
@@ -62,6 +77,21 @@ const deleteGroup = async (req, res) => {
         }
     }
 };
+const leaveGroupController = async (req, res) => {
+    const { userId, groupId } = req.body;
+
+    try {
+        const result = await leaveGroup(userId, groupId);
+        res.status(200).json(result);
+    } catch (error) {
+        if (error instanceof CustomError) {
+            res.status(error.statusCode).json({ message: error.message });
+        } else {
+            console.error('Error leaving group:', error);
+            res.status(500).json({ message: 'Internal server error' });
+        }
+    }
+};
 
 module.exports = {
     createGroup,
@@ -69,4 +99,5 @@ module.exports = {
     getGroupById,
     updateGroup,
     deleteGroup,
+    leaveGroupController,
 };

@@ -20,7 +20,8 @@ const loginUser = async ({ email, password }) => {
         throw new Error('Invalid email or password');
     }
     const payload = { id: user.id };
-    return jwt.sign(payload, process.env.JWT_SECRET, {expiresIn: '2h'});
+    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '100h' });
+    return { token, userId: user.id };
 };
 
 module.exports = {

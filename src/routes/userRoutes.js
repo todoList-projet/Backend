@@ -4,26 +4,12 @@ const router = express.Router();
 const passport = require('../config/passport');
 
 
+router.get('/emails', userController.getAllUsersEmail);
 
 router.post('/', userController.createUser);
 
 //router.get('/', userController.getAllUsers);
 router.get('/', passport.authenticate('jwt', { session: false }), userController.getAllUsers);
-/**
- * @swagger
- * /api/users/{id}:
- *   get:
- *     summary: Retrieve a single user by ID
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: A single user
- */
 router.get('/:id', userController.getUserById);
 
 /**
