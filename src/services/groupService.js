@@ -2,7 +2,7 @@ const { Group, User } = require('../models');
 const sequelize = require('../config/db');
 const { CustomError, AlreadyExistError } = require('../utils/errors');
 const { ModelSuccessMessage } = require('../utils/success');
-const { QueryTypes } = require('sequelize');
+const { QueryTypes, Op} = require('sequelize');
 
 // const createGroup = async (groupData) => {
 //     const existingGroup = await Group.findOne({ where: { name: groupData.name } });
@@ -70,23 +70,83 @@ const getGroupById = async (id) => {
     return group;
 };
 
+// const updateGroup = async (id, groupData) => {
+//     const group = await Group.findByPk(id);
+//     if (!group) {
+//         throw new CustomError(404, 'Group not found');
+//     }
+//
+//     if (groupData.name) {
+//         const existingGroup = await Group.findOne({
+//             where: { name: groupData.name, id: { [Op.ne]: id } }
+//         });
+//         if (existingGroup) {
+//             throw new AlreadyExistError('Group with this name');
+//         }
+//     }
+//
+//     await group.update(groupData);
+//     return new ModelSuccessMessage('Group', groupData.name, 'updated');
+// };
+
 const updateGroup = async (id, groupData) => {
+    const { name, description, assignedTo: userIds } = groupData;
     const group = await Group.findByPk(id);
     if (!group) {
         throw new CustomError(404, 'Group not found');
     }
 
-    if (groupData.name) {
+    if (name) {
         const existingGroup = await Group.findOne({
-            where: { name: groupData.name, id: { [Op.ne]: id } }
+            where: { name, id: { [Op.ne]: id } }
         });
         if (existingGroup) {
             throw new AlreadyExistError('Group with this name');
         }
     }
 
-    await group.update(groupData);
-    return new ModelSuccessMessage('Group', groupData.name, 'updated');
+    await group.update({ name, description });
+
+    let userCount = 0;
+
+    // Remove all current users from the group
+    const currentUsers = await group.getUsers();
+    for (const user of currentUsers) {
+        await user.removeGroup(group);
+    }
+
+    // Assign new users to the group
+    for (const id of userIds) {
+        try {
+            const user = await User.findByPk(id);
+            if (!user) {
+                console.error(`User with ID ${id} not found`);
+                continue;
+            }
+
+            // Check if the user is already in the group
+            const existingAssignment = await sequelize.query(
+                'SELECT * FROM `Group_User` WHERE `user_id` = :userId AND `group_id` = :groupId',
+                {
+                    replacements: { userId: id, groupId: group.id },
+                    type: QueryTypes.SELECT
+                }
+            );
+
+            if (existingAssignment.length === 0) {
+                // Assign user to group
+                await user.addGroup(group);
+                userCount++;
+            }
+        } catch (error) {
+            console.error(`Error assigning user with ID ${id} to group:`, error);
+        }
+    }
+
+    // Update the nb_users field in the group
+    await group.update({ nbUsers: userCount });
+
+    return new ModelSuccessMessage('Group', name, 'updated');
 };
 
 const deleteGroup = async (id) => {
@@ -98,6 +158,7 @@ const deleteGroup = async (id) => {
     await group.destroy();
     return new ModelSuccessMessage('Group', group.name, 'deleted');
 };
+
 const leaveGroup = async (userId, groupId) => {
     const group = await Group.findByPk(groupId);
     if (!group) {

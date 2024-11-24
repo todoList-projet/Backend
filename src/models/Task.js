@@ -1,9 +1,8 @@
 // models/Task.js
 const { DataTypes, Model } = require('sequelize');
 const sequelize = require('../config/db');
-const TypeTask = require('./TypeTask');
-const Status = require('./StatusTask');
-const User = require("./User");
+const moment = require('moment'); // Ensure you have moment.js installed
+
 
 class Task extends Model {}
 
@@ -23,11 +22,30 @@ Task.init({
     deadline: {
         type: DataTypes.DATE,
         allowNull: true,
+        get() {
+            return moment(this.getDataValue('deadline')).format('DD/MM/YYYY HH:mm');
+        }
     },
     creation_date: {
         type: DataTypes.DATE,
         defaultValue: DataTypes.NOW,
+        get() {
+            return moment(this.getDataValue('creation_date')).format('DD/MM/YYYY HH:mm');
+        }
     },
+    typeTaskId: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+    },
+    statusTaskId: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 1,
+    },
+    archived: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+    }
 }, {
     sequelize,
     modelName: 'Task',

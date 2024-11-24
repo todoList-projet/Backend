@@ -8,7 +8,7 @@ const options = {
         info: {
             title: 'Todo API',
             version: '1.0.0',
-            description: 'API de gestion de tâches',
+            description: 'API pour notre application TODOLIST',
         },
         servers: [
             {
@@ -17,7 +17,7 @@ const options = {
             },
         ],
     },
-    apis: ['./routes/*.js'], // Paths to your route files
+    apis: ['./src/routes/*.js'], // Corrected path to your route files
 };
 
 const specs = swaggerJsdoc(options);

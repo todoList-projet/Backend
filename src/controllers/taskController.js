@@ -17,10 +17,28 @@ const createTask = async (req, res) => {
 
 const getAllTasks = async (req, res) => {
     try {
-        const tasks = await taskService.getAllTasks();
+        const tasks = await taskService.getAllTasks(req.params.userId);
         res.status(200).json(tasks);
     } catch (err) {
         res.status(500).json({ error: 'An unexpected error occurred' });
+    }
+};
+
+const getPersonalTasks = async (req, res) => {
+    try {
+        const tasks = await taskService.getPersonalTasks(req.params.userId);
+        res.status(200).json(tasks);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+const getCollaborativeTasks = async (req, res) => {
+    try {
+        const tasks = await taskService.getCollaborativeTasks(req.params.userId);
+        res.status(200).json(tasks);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
     }
 };
 
@@ -63,10 +81,28 @@ const deleteTask = async (req, res) => {
     }
 };
 
+const updateTaskStatus = async (req, res) => {
+    try {
+        const { taskId, statusId } = req.body;
+
+        if (!taskId || !statusId) {
+            throw new CustomError(400, 'Task ID and Status ID are required');
+        }
+
+        const result = await taskService.updateTaskStatus(taskId, parseInt(statusId, 10));
+        res.status(200).json(result);
+    } catch (error) {
+        res.status(error.statusCode || 500).json({ error: error.message });
+    }
+};
+
 module.exports = {
     createTask,
     getAllTasks,
+    getPersonalTasks,
+    getCollaborativeTasks,
     getTaskById,
     updateTask,
     deleteTask,
+    updateTaskStatus
 };
