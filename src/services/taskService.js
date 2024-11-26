@@ -57,6 +57,9 @@ const createTask = async (taskData) => {
 
 const getAllTasks = async (userId) => {
     return await Task.findAll({
+        where: {
+            archived: 0
+        },
         include: [{
             model: User,
             as: 'users',
@@ -89,7 +92,8 @@ const getAllTasks = async (userId) => {
 const getPersonalTasks = async (userId) => {
     return await Task.findAll({
         where: {
-            typeTaskId: 1
+            typeTaskId: 1,
+            archived: 0
         },
         include: [{
             model: User,
@@ -121,7 +125,8 @@ const getPersonalTasks = async (userId) => {
 const getCollaborativeTasks = async (userId) => {
     return await Task.findAll({
         where: {
-            typeTaskId: 2
+            typeTaskId: 2,
+            archived: 0
         },
         include: [{
             model: User,
@@ -149,6 +154,37 @@ const getCollaborativeTasks = async (userId) => {
         }]
     });
 };
+
+const getArchivedTasks = async (userId) => {
+    return await Task.findAll({
+        where: {
+            archived: 1
+        },
+        include: [{
+            model: User,
+            as: 'users',
+            where: { id: userId },
+            attributes: ['id', 'first_name', 'last_name'],
+            through: { attributes: [] }
+        },
+        {
+            model: TypeTask,
+            as: 'type',
+            attributes: ['id', 'name']
+        },
+        {
+            model: StatusTask,
+            as: 'status',
+            attributes: ['id', 'name']
+        },
+        {
+            model: Group,
+            as: 'groups',
+            attributes: ['id', 'name'],
+            through: { attributes: [] }
+        }]
+    });
+}
 
 const getTaskById = async (id) => {
     const task = await Task.findByPk(id);
@@ -191,15 +227,9 @@ const updateTaskStatus = async (taskId, statusId) => {
     await task.update({ statusTaskId: statusId });
     return new ModelSuccessMessage('Task', task.title, 'status updated');
 };
-const archiveTask = async (taskId) => {
-    const task = await Task.findByPk(taskId);
-    if (!task) {
-        throw new CustomError(404, 'Task not found');
-    }
 
-    await task.update({ archived: true });
-    return new ModelSuccessMessage('Task', task.title, 'archived');
-};
+
+
 module.exports = {
     createTask,
     getAllTasks,
@@ -209,5 +239,5 @@ module.exports = {
     updateTask,
     deleteTask,
     updateTaskStatus,
-    archiveTask
+    getArchivedTasks
 };

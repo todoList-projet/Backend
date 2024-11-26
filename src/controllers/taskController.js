@@ -42,6 +42,16 @@ const getCollaborativeTasks = async (req, res) => {
     }
 };
 
+const getArchivedTasks = async (req, res) => {
+    try {
+        const tasks = await taskService.getArchivedTasks(req.params.userId);
+        res.status(200).json(tasks);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+
+}
+
 const getTaskById = async (req, res) => {
     try {
         const task = await taskService.getTaskById(req.params.id);
@@ -84,7 +94,7 @@ const deleteTask = async (req, res) => {
 const updateTaskStatus = async (req, res) => {
     try {
         const { taskId, statusId } = req.body;
-
+        console.log('taskId', taskId); // Debugging line
         if (!taskId || !statusId) {
             throw new CustomError(400, 'Task ID and Status ID are required');
         }
@@ -96,6 +106,7 @@ const updateTaskStatus = async (req, res) => {
     }
 };
 
+
 module.exports = {
     createTask,
     getAllTasks,
@@ -104,5 +115,6 @@ module.exports = {
     getTaskById,
     updateTask,
     deleteTask,
-    updateTaskStatus
+    updateTaskStatus,
+    getArchivedTasks
 };

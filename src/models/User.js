@@ -27,10 +27,6 @@ User.init({
     tableName: 'users',
 });
 
-// Associations
-// User.belongsToMany(Task, { through: 'User_Task', as: 'tasks' });
-// User.belongsToMany(Group, { through: 'User_Group', as: 'groups' });
-
 User.associate = (models) => {
     User.belongsToMany(models.Group, { through: 'Group_User', as: 'groups' });
     User.belongsToMany(models.Task, { through: 'Task_User', as: 'tasks' });
