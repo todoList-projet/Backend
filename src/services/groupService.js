@@ -1,17 +1,11 @@
-const { Group, User } = require('../models');
+const { Group, User,StatusTask,TypeTask } = require('../models');
 const sequelize = require('../config/db');
 const { CustomError, AlreadyExistError } = require('../utils/errors');
 const { ModelSuccessMessage } = require('../utils/success');
 const { QueryTypes, Op} = require('sequelize');
+const Task = require("../models/Task");
 
-// const createGroup = async (groupData) => {
-//     const existingGroup = await Group.findOne({ where: { name: groupData.name } });
-//     if (existingGroup) {
-//         throw new AlreadyExistError('Group with this name');
-//     }
-//     await Group.create(groupData);
-//     return new ModelSuccessMessage('Group', groupData.name, 'created');
-// };
+
 const createGroup = async (groupData) => {
     const { name, description, assignedTo: userIds } = groupData;
     const existingGroup = await Group.findOne({ where: { name } });
@@ -57,39 +51,39 @@ const createGroup = async (groupData) => {
     return new ModelSuccessMessage('Group', name, 'created');
 };
 
+const getAllGroups = async (userId) => {
 
-const getAllGroups = async () => {
-    return await Group.findAll();
+    return await Group.findAll({
+        include: [{
+            model: User,
+            as: 'users',
+            where: { id: userId },
+            attributes: ['id', 'first_name', 'last_name'],
+            through: { attributes: [] }
+        },
+        {
+            model: Task,
+            as: 'tasks',
+            attributes: ['id', 'title', 'description','deadline'],
+            include: [
+                {
+                    model: StatusTask,
+                    as: 'status',
+                    attributes: ['id', 'name']
+                },
+                {
+                    model: TypeTask,
+                    as: 'type',
+                    attributes: ['id', 'name']
+                }
+            ],
+            through: { attributes: [] }
+        }
+        ]
+    });
 };
 
-const getGroupById = async (id) => {
-    const group = await Group.findByPk(id);
-    if (!group) {
-        throw new CustomError(404, 'Group not found');
-    }
-    return group;
-};
-
-// const updateGroup = async (id, groupData) => {
-//     const group = await Group.findByPk(id);
-//     if (!group) {
-//         throw new CustomError(404, 'Group not found');
-//     }
-//
-//     if (groupData.name) {
-//         const existingGroup = await Group.findOne({
-//             where: { name: groupData.name, id: { [Op.ne]: id } }
-//         });
-//         if (existingGroup) {
-//             throw new AlreadyExistError('Group with this name');
-//         }
-//     }
-//
-//     await group.update(groupData);
-//     return new ModelSuccessMessage('Group', groupData.name, 'updated');
-// };
-
-const updateGroup = async (id, groupData) => {
+const updateGroup = async (id, groupData, userId) => {
     const { name, description, assignedTo: userIds } = groupData;
     const group = await Group.findByPk(id);
     if (!group) {
@@ -109,10 +103,17 @@ const updateGroup = async (id, groupData) => {
 
     let userCount = 0;
 
-    // Remove all current users from the group
+    // Remove all current users from the group except the user making the request
     const currentUsers = await group.getUsers();
     for (const user of currentUsers) {
-        await user.removeGroup(group);
+        if (user.id !== userId) {
+            await user.removeGroup(group);
+        }
+    }
+
+    // Ensure the user making the request is always in the group
+    if (!userIds.includes(userId)) {
+        userIds.push(userId);
     }
 
     // Assign new users to the group
@@ -149,15 +150,7 @@ const updateGroup = async (id, groupData) => {
     return new ModelSuccessMessage('Group', name, 'updated');
 };
 
-const deleteGroup = async (id) => {
-    const group = await Group.findByPk(id);
-    if (!group) {
-        throw new CustomError(404, 'Group not found');
-    }
 
-    await group.destroy();
-    return new ModelSuccessMessage('Group', group.name, 'deleted');
-};
 
 const leaveGroup = async (userId, groupId) => {
     const group = await Group.findByPk(groupId);
@@ -195,7 +188,23 @@ const leaveGroup = async (userId, groupId) => {
 
     return new ModelSuccessMessage('User', userId, 'left the group successfully');
 };
+//not using
+const getGroupById = async (id) => {
+    const group = await Group.findByPk(id);
+    if (!group) {
+        throw new CustomError(404, 'Group not found');
+    }
+    return group;
+};
+const deleteGroup = async (id) => {
+    const group = await Group.findByPk(id);
+    if (!group) {
+        throw new CustomError(404, 'Group not found');
+    }
 
+    await group.destroy();
+    return new ModelSuccessMessage('Group', group.name, 'deleted');
+};
 module.exports = {
     createGroup,
     getAllGroups,
