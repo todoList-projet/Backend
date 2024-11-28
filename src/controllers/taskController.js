@@ -3,7 +3,8 @@ const { CustomError } = require('../utils/errors');
 
 const createTask = async (req, res) => {
     try {
-        const task = await taskService.createTask(req.body);
+        const userId = req.user.id;
+        const task = await taskService.createTask(req.body, userId);
         res.status(201).json(task);
     } catch (err) {
         if (err instanceof CustomError) {
@@ -17,7 +18,8 @@ const createTask = async (req, res) => {
 
 const getAllTasks = async (req, res) => {
     try {
-        const tasks = await taskService.getAllTasks(req.params.userId);
+        const userId = req.user.id;
+        const tasks = await taskService.getAllTasks(userId);
         res.status(200).json(tasks);
     } catch (err) {
         res.status(500).json({ error: 'An unexpected error occurred' });
@@ -26,7 +28,8 @@ const getAllTasks = async (req, res) => {
 
 const getPersonalTasks = async (req, res) => {
     try {
-        const tasks = await taskService.getPersonalTasks(req.params.userId);
+        const userId = req.user.id;
+        const tasks = await taskService.getPersonalTasks(userId);
         res.status(200).json(tasks);
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -35,25 +38,26 @@ const getPersonalTasks = async (req, res) => {
 
 const getCollaborativeTasks = async (req, res) => {
     try {
-        const tasks = await taskService.getCollaborativeTasks(req.params.userId);
+        const userId = req.user.id;
+        const tasks = await taskService.getCollaborativeTasks(userId);
         res.status(200).json(tasks);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
 };
 
-const getTaskById = async (req, res) => {
+const getArchivedTasks = async (req, res) => {
     try {
-        const task = await taskService.getTaskById(req.params.id);
-        res.status(200).json(task);
-    } catch (err) {
-        if (err instanceof CustomError) {
-            res.status(err.statusCode).json({ error: err.message });
-        } else {
-            res.status(500).json({ error: 'An unexpected error occurred' });
-        }
+        const userId = req.user.id;
+        const tasks = await taskService.getArchivedTasks(userId);
+        res.status(200).json(tasks);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
     }
-};
+
+}
+
+
 
 const updateTask = async (req, res) => {
     try {
@@ -83,26 +87,52 @@ const deleteTask = async (req, res) => {
 
 const updateTaskStatus = async (req, res) => {
     try {
-        const { taskId, statusId } = req.body;
-
+        const { statusId } = req.body;
+        const { taskId } = req.params;
+        console.log('task id', taskId);
+        console.log('status id', statusId);
         if (!taskId || !statusId) {
             throw new CustomError(400, 'Task ID and Status ID are required');
         }
 
-        const result = await taskService.updateTaskStatus(taskId, parseInt(statusId, 10));
+        const result = await taskService.updateTaskStatus(taskId, statusId);
         res.status(200).json(result);
     } catch (error) {
         res.status(error.statusCode || 500).json({ error: error.message });
     }
 };
 
+const archiveTask = async (req, res) => {
+    try {
+        const { taskId } = req.params;
+        const result = await taskService.archiveTask(taskId);
+        res.status(200).json(result);
+    } catch (error) {
+        res.status(error.statusCode || 500).json({ error: error.message });
+    }
+};
+
+const getTaskById = async (req, res) => {
+    try {
+        const task = await taskService.getTaskById(req.params.id);
+        res.status(200).json(task);
+    } catch (err) {
+        if (err instanceof CustomError) {
+            res.status(err.statusCode).json({ error: err.message });
+        } else {
+            res.status(500).json({ error: 'An unexpected error occurred' });
+        }
+    }
+};
 module.exports = {
     createTask,
     getAllTasks,
     getPersonalTasks,
     getCollaborativeTasks,
-    getTaskById,
+    getArchivedTasks,
     updateTask,
+    updateTaskStatus,
     deleteTask,
-    updateTaskStatus
+    archiveTask,
+    getTaskById,
 };
