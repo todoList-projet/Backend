@@ -52,35 +52,22 @@ const createGroup = async (groupData) => {
 };
 
 const getAllGroups = async (userId) => {
+    try {
+        return await Group.findAll({
+            include: [{
+                model: User,
+                as: 'users',
+                where: { id: userId },
+                attributes: [],
+                through: { attributes: [] }
+            },],
+            attributes: ['id', 'name', 'description', 'nbUsers'],
 
-    return await Group.findAll({
-        include: [{
-            model: User,
-            as: 'users',
-            where: { id: userId },
-            attributes: ['id', 'first_name', 'last_name'],
-            through: { attributes: [] }
-        },
-        {
-            model: Task,
-            as: 'tasks',
-            attributes: ['id', 'title', 'description','deadline'],
-            include: [
-                {
-                    model: StatusTask,
-                    as: 'status',
-                    attributes: ['id', 'name']
-                },
-                {
-                    model: TypeTask,
-                    as: 'type',
-                    attributes: ['id', 'name']
-                }
-            ],
-            through: { attributes: [] }
-        }
-        ]
-    });
+        });
+    } catch (error) {
+        console.error('Error fetching groups:', error);
+        throw new CustomError(500, 'An unexpected error occurred');
+    }
 };
 
 const updateGroup = async (id, groupData, userId) => {
@@ -188,6 +175,8 @@ const leaveGroup = async (userId, groupId) => {
 
     return new ModelSuccessMessage('User', userId, 'left the group successfully');
 };
+
+
 //not using
 const getGroupById = async (id) => {
     const group = await Group.findByPk(id);

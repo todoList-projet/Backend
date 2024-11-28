@@ -5,36 +5,34 @@ const TypeTask = require("../models/TypeTask");
 const StatusTask = require("../models/StatusTask");
 const { CustomError } = require('../utils/errors');
 const { ModelSuccessMessage } = require('../utils/success');
+const sequelize = require('../config/db');
 
-
-const createTask = async (taskData) => {
-    const { type_task_id, group_ids, id_user, ...rest } = taskData;
+const createTask = async (taskData, userId) => {
+    const {typeTaskId, groupIds, ...rest} = taskData;
 
     // Create the task with statusTaskId set to 1 by default
     const task = await Task.create({
         ...rest,
-        typeTaskId: type_task_id,
+        typeTaskId,
         statusTaskId: 1,
     });
 
-    console.log('task', task);
-
-    if (type_task_id === 2 && group_ids && group_ids.length > 0) {
+    if (typeTaskId === 2 && groupIds && groupIds.length > 0) {
         // If the task is collaborative, add references to the task_group table
         const groups = await Group.findAll({
             where: {
-                id: group_ids
+                id: groupIds
             }
         });
 
-        if (groups.length !== group_ids.length) {
+        if (groups.length !== groupIds.length) {
             throw new CustomError(400, 'Some groups not found');
         }
 
         await task.addGroups(groups);
-    } else if (type_task_id === 1 && id_user) {
+    } else if (typeTaskId === 1) {
         // If the task is personal, associate it with the user
-        const user = await User.findByPk(id_user);
+        const user = await User.findByPk(userId);
         if (!user) {
             throw new CustomError(404, 'User not found');
         }
@@ -42,149 +40,207 @@ const createTask = async (taskData) => {
     } else {
         throw new CustomError(400, 'Invalid task type or missing required data');
     }
-
-    // Add reference to the task_user table in both cases
-    if (id_user) {
-        const user = await User.findByPk(id_user);
-        if (!user) {
-            throw new CustomError(404, 'User not found');
-        }
-        await task.addUser(user);
-    }
-
     return new ModelSuccessMessage('Task', task.title, 'created');
+
 };
-
 const getAllTasks = async (userId) => {
-    return await Task.findAll({
-        where: {
-            archived: 0
-        },
-        include: [{
-            model: User,
-            as: 'users',
-            where: { id: userId },
-            attributes: ['id', 'first_name', 'last_name'],
-            through: { attributes: [] }
+    const query = `
+        SELECT DISTINCT 
+            t.id, 
+            t.title, 
+            t.category, 
+            t.description, 
+            t.deadline, 
+            t.creation_date,
+            tt.id AS type_id, 
+            tt.name AS type_name,
+            st.id AS status_id, 
+            st.name AS status_name,
+            g.id AS group_id, 
+            g.name AS group_name
+        FROM tasks t
+        LEFT JOIN type_tasks tt ON t.type_task_id = tt.id
+        LEFT JOIN status_tasks st ON t.status_task_id = st.id
+        LEFT JOIN task_user tu ON t.id = tu.task_id
+        LEFT JOIN task_group tg ON t.id = tg.task_id
+        LEFT JOIN \`groups\` g ON tg.group_id = g.id
+        LEFT JOIN group_user gu ON g.id = gu.group_id
+        WHERE t.archived = 0 AND (tu.user_id = :userId OR gu.user_id = :userId);
+    `;
 
-        },
-        {
-            model: TypeTask,
-            as: 'type',
-            attributes: ['id', 'name']
-        },
-        {
-            model: StatusTask,
-            as: 'status',
-            attributes: ['id', 'name']
-        },
-        {
-            model: Group,
-            as: 'groups',
-            attributes: ['id', 'name'],
-            through: { attributes: [] }
-        }
-
-        ]
+    const tasks = await sequelize.query(query, {
+        replacements: { userId },
+        type: sequelize.QueryTypes.SELECT
     });
+
+    return tasks.map(task => ({
+        id: task.id,
+        title: task.title,
+        category: task.category,
+        description: task.description,
+        deadline: task.deadline,
+        creation_date: task.creation_date,
+        type: {
+            id: task.type_id,
+            name: task.type_name
+        },
+        status: {
+            id: task.status_id,
+            name: task.status_name
+        },
+        group: {
+            id: task.group_id,
+            name: task.group_name
+        }
+    }));
 };
 
 const getPersonalTasks = async (userId) => {
-    return await Task.findAll({
-        where: {
-            typeTaskId: 1,
-            archived: 0
-        },
-        include: [{
-            model: User,
-            as: 'users',
-            where: { id: userId },
-            attributes: ['id', 'first_name', 'last_name']   ,
-            through: { attributes: [] }
-        },
-        {
-            model: TypeTask,
-            as: 'type',
-            attributes: ['id', 'name']
-        },
-        {
-            model: StatusTask,
-            as: 'status',
-            attributes: ['id', 'name']
-        },
-        {
-            model: Group,
-            as: 'groups',
-            attributes: ['id', 'name'],
-            through: { attributes: [] }
-        }
-        ]
+    const query = `
+        SELECT DISTINCT 
+            t.id, 
+            t.title, 
+            t.category, 
+            t.description, 
+            t.deadline, 
+            t.creation_date,
+            tt.id AS type_id, 
+            tt.name AS type_name,
+            st.id AS status_id, 
+            st.name AS status_name
+        FROM tasks t
+        LEFT JOIN type_tasks tt ON t.type_task_id = tt.id
+        LEFT JOIN status_tasks st ON t.status_task_id = st.id
+        LEFT JOIN task_user tu ON t.id = tu.task_id
+        WHERE t.archived = 0 AND t.type_task_id = 1 AND tu.user_id = :userId;
+    `;
+
+    const tasks = await sequelize.query(query, {
+        replacements: { userId },
+        type: sequelize.QueryTypes.SELECT
     });
+
+    return tasks.map(task => ({
+        id: task.id,
+        title: task.title,
+        category: task.category,
+        description: task.description,
+        deadline: task.deadline,
+        creation_date: task.creation_date,
+        type: {
+            id: task.type_id,
+            name: task.type_name
+        },
+        status: {
+            id: task.status_id,
+            name: task.status_name
+        }
+    }));
 };
 
 const getCollaborativeTasks = async (userId) => {
-    return await Task.findAll({
-        where: {
-            typeTaskId: 2,
-            archived: 0
-        },
-        include: [{
-            model: User,
-            as: 'users',
-            where: { id: userId },
-            attributes: ['id', 'first_name', 'last_name'],
-            through: { attributes: [] }
+    const query = `
+        SELECT DISTINCT 
+            t.id, 
+            t.title, 
+            t.category, 
+            t.description, 
+            t.deadline, 
+            t.creation_date,
+            tt.id AS type_id, 
+            tt.name AS type_name,
+            st.id AS status_id, 
+            st.name AS status_name,
+            g.id AS group_id, 
+            g.name AS group_name
+        FROM tasks t
+        LEFT JOIN type_tasks tt ON t.type_task_id = tt.id
+        LEFT JOIN status_tasks st ON t.status_task_id = st.id
+        LEFT JOIN task_user tu ON t.id = tu.task_id
+        LEFT JOIN task_group tg ON t.id = tg.task_id
+        LEFT JOIN \`groups\` g ON tg.group_id = g.id
+        LEFT JOIN group_user gu ON g.id = gu.group_id
+        WHERE t.archived = 0 AND t.type_task_id = 2 AND (tu.user_id = :userId OR gu.user_id = :userId);
+    `;
 
-        },
-        {
-            model: TypeTask,
-            as: 'type',
-            attributes: ['id', 'name']
-        },
-        {
-            model: StatusTask,
-            as: 'status',
-            attributes: ['id', 'name']
-        },
-        {
-            model: Group,
-            as: 'groups',
-            attributes: ['id', 'name'],
-            through: { attributes: [] }
-        }]
+    const tasks = await sequelize.query(query, {
+        replacements: { userId },
+        type: sequelize.QueryTypes.SELECT
     });
+
+    return tasks.map(task => ({
+        id: task.id,
+        title: task.title,
+        category: task.category,
+        description: task.description,
+        deadline: task.deadline,
+        creation_date: task.creation_date,
+        type: {
+            id: task.type_id,
+            name: task.type_name
+        },
+        status: {
+            id: task.status_id,
+            name: task.status_name
+        },
+        group: {
+            id: task.group_id,
+            name: task.group_name
+        }
+    }));
 };
 
 const getArchivedTasks = async (userId) => {
-    return await Task.findAll({
-        where: {
-            archived: 1
-        },
-        include: [{
-            model: User,
-            as: 'users',
-            where: { id: userId },
-            attributes: ['id', 'first_name', 'last_name'],
-            through: { attributes: [] }
-        },
-        {
-            model: TypeTask,
-            as: 'type',
-            attributes: ['id', 'name']
-        },
-        {
-            model: StatusTask,
-            as: 'status',
-            attributes: ['id', 'name']
-        },
-        {
-            model: Group,
-            as: 'groups',
-            attributes: ['id', 'name'],
-            through: { attributes: [] }
-        }]
+    const query = `
+        SELECT DISTINCT
+            t.id,
+            t.title,
+            t.category,
+            t.description,
+            t.deadline,
+            t.creation_date,
+            tt.id AS type_id,
+            tt.name AS type_name,
+            st.id AS status_id,
+            st.name AS status_name,
+            g.id AS group_id,
+            g.name AS group_name
+        FROM tasks t
+        LEFT JOIN type_tasks tt ON t.type_task_id = tt.id
+        LEFT JOIN status_tasks st ON t.status_task_id = st.id
+        LEFT JOIN task_user tu ON t.id = tu.task_id
+        LEFT JOIN task_group tg ON t.id = tg.task_id
+        LEFT JOIN \`groups\` g ON tg.group_id = g.id
+        LEFT JOIN group_user gu ON g.id = gu.group_id
+        WHERE t.archived = 1 AND (tu.user_id = :userId OR gu.user_id = :userId);
+    `;
+
+    const tasks = await sequelize.query(query, {
+        replacements: { userId },
+        type: sequelize.QueryTypes.SELECT
     });
-}
+
+    return tasks.map(task => ({
+        id: task.id,
+        title: task.title,
+        category: task.category,
+        description: task.description,
+        deadline: task.deadline,
+        creation_date: task.creation_date,
+        type: {
+            id: task.type_id,
+            name: task.type_name
+        },
+        status: {
+            id: task.status_id,
+            name: task.status_name
+        },
+        group: {
+            id: task.group_id,
+            name: task.group_name
+        }
+    }));
+};
 
 const getTaskById = async (id) => {
     const task = await Task.findByPk(id);
@@ -228,16 +284,27 @@ const updateTaskStatus = async (taskId, statusId) => {
     return new ModelSuccessMessage('Task', task.title, 'status updated');
 };
 
+const archiveTask = async (taskId) => {
+    const task = await Task.findByPk(taskId);
+    if (!task) {
+        throw new CustomError(404, 'Task not found');
+    }
 
+    await task.update({ archived: true });
+    return new ModelSuccessMessage('Task', task.title, 'archived');
+};
 
 module.exports = {
     createTask,
     getAllTasks,
     getPersonalTasks,
     getCollaborativeTasks,
-    getTaskById,
+    getArchivedTasks,
+
     updateTask,
     deleteTask,
     updateTaskStatus,
-    getArchivedTasks
+    archiveTask,
+    getTaskById,
+
 };

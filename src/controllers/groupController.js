@@ -17,7 +17,7 @@ const { CustomError } = require('../utils/errors');
 
 const createGroup = async (req, res) => {
     try {
-        const userId = req.user.id; // Assuming the user ID is stored in req.user
+        const userId = req.user.id;
         const groupData = { ...req.body, assignedTo: [userId, ...req.body.assignedTo] };
         const group = await groupService.createGroup(groupData);
         res.status(201).json(group);
@@ -34,7 +34,6 @@ const createGroup = async (req, res) => {
 const getAllGroups = async (req, res) => {
     try {
         const userId = req.user.id;
-
         const groups = await groupService.getAllGroups(userId);
 
         res.status(200).json(groups);
@@ -42,9 +41,6 @@ const getAllGroups = async (req, res) => {
         res.status(500).json({ error: 'An unexpected error occurred' });
     }
 };
-
-
-
 
 const updateGroup = async (req, res) => {
     try {
