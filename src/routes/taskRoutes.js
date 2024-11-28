@@ -15,7 +15,7 @@ router.put('/:taskId/update-status', authenticateJWT, taskController.updateTaskS
 router.delete('/:id', authenticateJWT, taskController.deleteTask);
 router.put('/:taskId/archive', authenticateJWT, taskController.archiveTask);
 
-
+//unused
 router.get('/:id', authenticateJWT, taskController.getTaskById);
 
 
