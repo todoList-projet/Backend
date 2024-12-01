@@ -1,9 +1,8 @@
-const { Group, User,StatusTask,TypeTask } = require('../models');
+const { Group, User,Task } = require('../models');
 const sequelize = require('../config/db');
 const { CustomError, AlreadyExistError } = require('../utils/errors');
 const { ModelSuccessMessage } = require('../utils/success');
 const { QueryTypes, Op} = require('sequelize');
-const Task = require("../models/Task");
 
 
 const createGroup = async (groupData) => {
@@ -88,7 +87,6 @@ const updateGroup = async (id, groupData, userId) => {
 
     await group.update({ name, description });
 
-    let userCount = 0;
 
     // Remove all current users from the group except the user making the request
     const currentUsers = await group.getUsers();
@@ -124,20 +122,19 @@ const updateGroup = async (id, groupData, userId) => {
             if (existingAssignment.length === 0) {
                 // Assign user to group
                 await user.addGroup(group);
-                userCount++;
             }
         } catch (error) {
             console.error(`Error assigning user with ID ${id} to group:`, error);
         }
     }
+    // Count the number of users in the group
+    const userCount = await group.countUsers();
 
     // Update the nb_users field in the group
     await group.update({ nbUsers: userCount });
 
     return new ModelSuccessMessage('Group', name, 'updated');
 };
-
-
 
 const leaveGroup = async (userId, groupId) => {
     const group = await Group.findByPk(groupId);
@@ -176,6 +173,19 @@ const leaveGroup = async (userId, groupId) => {
     return new ModelSuccessMessage('User', userId, 'left the group successfully');
 };
 
+const getMembersGroup = async (groupId) => {
+    const group = await Group.findByPk(groupId);
+    if (!group) {
+        throw new CustomError(404, 'Group not found');
+    }
+
+    return await group.getUsers({
+        attributes: ['id', 'first_name', 'last_name'],
+        joinTableAttributes: []
+    });
+};
+
+
 
 //not using
 const getGroupById = async (id) => {
@@ -201,4 +211,6 @@ module.exports = {
     updateGroup,
     deleteGroup,
     leaveGroup,
+    getMembersGroup
+
 };

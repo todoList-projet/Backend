@@ -1,19 +1,6 @@
 const groupService = require('../services/groupService');
 const { CustomError } = require('../utils/errors');
 
-// const createGroup = async (req, res) => {
-//     try {
-//         const group = await groupService.createGroup(req.body);
-//         res.status(201).json(group);
-//     } catch (err) {
-//         if (err instanceof CustomError) {
-//             res.status(err.statusCode).json({ error: err.message });
-//         } else {
-//             console.error(err.stack);
-//             res.status(500).json({ error: 'An unexpected error occurred' });
-//         }
-//     }
-// };
 
 const createGroup = async (req, res) => {
     try {
@@ -71,6 +58,19 @@ const leaveGroup = async (req, res) => {
     }
 };
 
+const getMembersGroup = async (req, res) => {
+    try {
+        const members = await groupService.getMembersGroup(req.params.id);
+        res.status(200).json(members);
+    } catch (err) {
+        if (err instanceof CustomError) {
+            res.status(err.statusCode).json({ error: err.message });
+        } else {
+            res.status(500).json({ error: 'An unexpected error occurred' });
+        }
+    }
+};
+
 //unused
 const getGroupById = async (req, res) => {
     try {
@@ -96,21 +96,7 @@ const deleteGroup = async (req, res) => {
         }
     }
 };
-// const leaveGroup = async (req, res) => {
-//     const { userId, groupId } = req.body;
-//
-//     try {
-//         const result = await groupService.leaveGroup(userId, groupId);
-//         res.status(200).json(result);
-//     } catch (error) {
-//         if (error instanceof CustomError) {
-//             res.status(error.statusCode).json({ message: error.message });
-//         } else {
-//             console.error('Error leaving group:', error);
-//             res.status(500).json({ message: 'Internal server error' });
-//         }
-//     }
-// };
+
 
 module.exports = {
     createGroup,
@@ -119,4 +105,5 @@ module.exports = {
     updateGroup,
     deleteGroup,
     leaveGroup,
+    getMembersGroup
 };

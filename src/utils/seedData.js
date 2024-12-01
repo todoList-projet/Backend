@@ -2,7 +2,7 @@ const StatusTask = require('../models/StatusTask');
 const TypeTask = require('../models/TypeTask');
 
 const insertDefaultStatuses = async () => {
-    const status = ['to do', 'in progress', 'completed', 'abandoned'];
+    const status = ['To Do', 'In Progress', 'Completed', 'Abandoned'];
     for (const name of status) {
         const [, created] = await StatusTask.findOrCreate({ where: { name } });
         if (created) {
@@ -14,7 +14,7 @@ const insertDefaultStatuses = async () => {
 };
 
 const insertDefaultTypeTasks = async () => {
-    const types = ['personal', 'collaborative'];
+    const types = ['Personal', 'Collaborative'];
     for (const name of types) {
         const [, created] = await TypeTask.findOrCreate({ where: { name } });
         if (created) {

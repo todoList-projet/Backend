@@ -16,7 +16,7 @@ app.use(passport.initialize());
 
 // Configure CORS
 const corsOptions = {
-    origin: 'http://localhost:3001', // Replace with your Next.js frontend URL
+    origin: ['http://localhost:3000','http://localhost:3001', 'http://localhost:3002'], // Replace with your Next.js frontend URLs
     optionsSuccessStatus: 200
 };
 app.use(cors(corsOptions));

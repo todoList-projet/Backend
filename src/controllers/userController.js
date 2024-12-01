@@ -15,27 +15,20 @@ const createUser = async (req, res) => {
     }
 };
 
-const getAllUsers = async (req, res) => {
+const getAllUsersExceptCurrent = async (req, res) => {
     try {
-        const users = await userService.getAllUsers();
+        const userId = req.user.id;
+        const users = await userService.getAllUsersExceptCurrent(userId);
         res.status(200).json(users);
     } catch (err) {
         res.status(500).json({ error: 'An unexpected error occurred' });
     }
 };
 
-const getAllUsersEmail = async (req, res) => {
-    try {
-        const users = await userService.getAllUsersEmail();
-        res.status(200).json(users);
-    } catch (err) {
-        res.status(500).json({ error: 'An unexpected error occurred' });
-    }
-}
-
 const getUserById = async (req, res) => {
     try {
-        const user = await userService.getUserById(req.params.id);
+        const userId = req.user.id;
+        const user = await userService.getUserById(userId);
         res.status(200).json(user);
     } catch (err) {
         if (err instanceof CustomError) {
@@ -48,9 +41,11 @@ const getUserById = async (req, res) => {
 
 const updateUser = async (req, res) => {
     try {
-        const updatedUser = await userService.updateUser(req.params.id, req.body);
+        const userId = req.user.id; // Get user ID from token
+        const updatedUser = await userService.updateUser(userId, req.body);
         res.status(200).json(updatedUser);
     } catch (err) {
+        console.error(err); // Log the error details
         if (err instanceof CustomError) {
             res.status(err.statusCode).json({ error: err.message });
         } else {
@@ -73,8 +68,8 @@ const deleteUser = async (req, res) => {
 };
 
 module.exports = {
-    getAllUsers,
-    getAllUsersEmail,
+    //getAllUsers,
+    getAllUsersExceptCurrent,
     createUser,
     getUserById,
     updateUser,
