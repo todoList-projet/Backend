@@ -2,6 +2,7 @@ const User = require('../models/User');
 const { CustomError, AlreadyExistError } = require('../utils/errors');
 const { ModelSuccessMessage } = require('../utils/success');
 const { Op } = require('sequelize');
+const bcrypt = require('bcryptjs');
 
 const createUser = async (userData) => {
     const existingUser = await User.findOne({ where: { email: userData.email } });
@@ -12,18 +13,21 @@ const createUser = async (userData) => {
     return new ModelSuccessMessage('User', userData.first_name, 'created' );
 };
 
-const getAllUsers = async () => {
-    return await User.findAll();
-};
-//get by id et names
-const getAllUsersEmail = async () => {
+
+
+const getAllUsersExceptCurrent = async (userId) => {
     return await User.findAll({
-        attributes: ['id', 'email']
+        where: {
+            id: { [Op.ne]: userId }
+        }
     });
 };
 
+
 const getUserById = async (id) => {
-    const user = await User.findByPk(id);
+    const user = await User.findByPk(id, {
+        attributes: { exclude: ['password'] }
+    });
     if (!user) {
         throw new CustomError(404, 'User not found');
     }
@@ -45,6 +49,10 @@ const updateUser = async (id, userData) => {
         }
     }
 
+    if (userData.password) {
+        userData.password = await bcrypt.hash(userData.password, 10);
+    }
+
     await user.update(userData);
     return new ModelSuccessMessage('User', userData.first_name, 'updated');
 };
@@ -61,8 +69,8 @@ const deleteUser = async (id) => {
 
 module.exports = {
     createUser,
-    getAllUsers,
-    getAllUsersEmail,
+   // getAllUsers,
+    getAllUsersExceptCurrent,
     getUserById,
     updateUser,
     deleteUser,

@@ -8,7 +8,7 @@ const { ModelSuccessMessage } = require('../utils/success');
 const sequelize = require('../config/db');
 
 const createTask = async (taskData, userId) => {
-    const {typeTaskId, groupIds, ...rest} = taskData;
+    const { typeTaskId, groupId, ...rest } = taskData;
 
     // Create the task with statusTaskId set to 1 by default
     const task = await Task.create({
@@ -17,19 +17,18 @@ const createTask = async (taskData, userId) => {
         statusTaskId: 1,
     });
 
-    if (typeTaskId === 2 && groupIds && groupIds.length > 0) {
-        // If the task is collaborative, add references to the task_group table
-        const groups = await Group.findAll({
-            where: {
-                id: groupIds
-            }
-        });
-
-        if (groups.length !== groupIds.length) {
-            throw new CustomError(400, 'Some groups not found');
+    if (typeTaskId === 2) {
+        // If the task is collaborative, ensure a single group ID is provided
+        if (!groupId) {
+            throw new CustomError(400, 'A collaborative task must be assigned to a group');
         }
 
-        await task.addGroups(groups);
+        const group = await Group.findByPk(groupId);
+        if (!group) {
+            throw new CustomError(400, 'Group not found');
+        }
+
+        await task.addGroup(group);
     } else if (typeTaskId === 1) {
         // If the task is personal, associate it with the user
         const user = await User.findByPk(userId);
@@ -40,9 +39,10 @@ const createTask = async (taskData, userId) => {
     } else {
         throw new CustomError(400, 'Invalid task type or missing required data');
     }
-    return new ModelSuccessMessage('Task', task.title, 'created');
 
+    return new ModelSuccessMessage('Task', task.title, 'created');
 };
+
 const getAllTasks = async (userId) => {
     const query = `
         SELECT DISTINCT 
@@ -269,6 +269,7 @@ const deleteTask = async (id) => {
     await task.destroy();
     return new ModelSuccessMessage('Task', task.title, 'deleted');
 };
+
 const updateTaskStatus = async (taskId, statusId) => {
     const validStatusIds = [1, 2, 3, 4];
     if (!validStatusIds.includes(statusId)) {
@@ -294,6 +295,50 @@ const archiveTask = async (taskId) => {
     return new ModelSuccessMessage('Task', task.title, 'archived');
 };
 
+const getTasksByGroup = async (groupId) => {
+    const group = await Group.findByPk(groupId, {
+        include: [{
+            model: Task,
+            as: 'tasks',
+            include: [
+                {
+                    model: TypeTask,
+                    as: 'type', // Use the correct alias
+                    attributes: ['id', 'name']
+                },
+                {
+                    model: StatusTask,
+                    as: 'status', // Use the correct alias
+                    attributes: ['id', 'name']
+                },
+            ]
+        }],
+    });
+
+    if (!group) {
+        throw new CustomError(404, 'Group not found');
+    }
+
+    return group.tasks.map(task => ({
+        id: task.id,
+        title: task.title,
+        category: task.category,
+        description: task.description,
+        deadline: task.deadline,
+        creation_date: task.creation_date,
+        type: {
+            id: task.type.id,
+            name: task.type.name
+        },
+        status: {
+            id: task.status.id,
+            name: task.status.name
+        },
+        archived: task.archived,
+
+    }));
+};
+
 module.exports = {
     createTask,
     getAllTasks,
@@ -306,5 +351,6 @@ module.exports = {
     updateTaskStatus,
     archiveTask,
     getTaskById,
+    getTasksByGroup
 
 };

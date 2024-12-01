@@ -112,6 +112,16 @@ const archiveTask = async (req, res) => {
     }
 };
 
+const getTasksByGroup = async (req, res) => {
+    try {
+        const { groupId } = req.params;
+        const result = await taskService.getTasksByGroup(groupId);
+        res.status(200).json(result);
+    } catch (error) {
+        res.status(error.statusCode || 500).json({ message: error.message });
+    }
+};
+
 const getTaskById = async (req, res) => {
     try {
         const task = await taskService.getTaskById(req.params.id);
@@ -135,4 +145,5 @@ module.exports = {
     deleteTask,
     archiveTask,
     getTaskById,
+    getTasksByGroup
 };

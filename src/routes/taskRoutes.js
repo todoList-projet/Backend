@@ -8,6 +8,7 @@ router.get('/', authenticateJWT, taskController.getAllTasks);
 router.get('/personal', authenticateJWT, taskController.getPersonalTasks);
 router.get('/collaborative', authenticateJWT, taskController.getCollaborativeTasks);
 router.get('/archived', authenticateJWT, taskController.getArchivedTasks);
+router.get('/group/:groupId', authenticateJWT, taskController.getTasksByGroup);
 
 router.put('/:id', authenticateJWT, taskController.updateTask);
 router.put('/:taskId/update-status', authenticateJWT, taskController.updateTaskStatus);
