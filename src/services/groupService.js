@@ -4,6 +4,15 @@ const { CustomError, AlreadyExistError } = require('../utils/errors');
 const { ModelSuccessMessage } = require('../utils/success');
 const { QueryTypes, Op} = require('sequelize');
 
+const getAllGroup = async () => {
+    try {
+        return await Group.findAll();
+    } catch (error) {
+        console.error('Error fetching groups:', error);
+        throw new CustomError(500, 'An unexpected error occurred');
+    }
+}
+
 
 const createGroup = async (groupData) => {
     const { name, description, assignedTo: userIds } = groupData;
@@ -211,6 +220,6 @@ module.exports = {
     updateGroup,
     deleteGroup,
     leaveGroup,
-    getMembersGroup
-
+    getMembersGroup,
+    getAllGroup
 };

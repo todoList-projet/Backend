@@ -13,6 +13,6 @@ router.get('/:id/members', authenticateJWT, groupController.getMembersGroup);
 //unused
 router.get('/:id', authenticateJWT, groupController.getGroupById);
 router.delete('/:id', authenticateJWT, groupController.deleteGroup);
-
+router.get('/all/all', groupController.getAllGroup);
 
 module.exports = router;

@@ -134,6 +134,15 @@ const getTaskById = async (req, res) => {
         }
     }
 };
+
+const getAllTask = async (req, res) => {
+    try {
+        const tasks = await taskService.getAllTask();
+        res.status(200).json(tasks);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
 module.exports = {
     createTask,
     getAllTasks,
@@ -145,5 +154,6 @@ module.exports = {
     deleteTask,
     archiveTask,
     getTaskById,
-    getTasksByGroup
+    getTasksByGroup,
+    getAllTask
 };

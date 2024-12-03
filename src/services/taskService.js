@@ -339,18 +339,22 @@ const getTasksByGroup = async (groupId) => {
     }));
 };
 
+const getAllTask = async () => {
+    return await Task.findAll();
+}
+
 module.exports = {
     createTask,
     getAllTasks,
     getPersonalTasks,
     getCollaborativeTasks,
     getArchivedTasks,
-
     updateTask,
     deleteTask,
     updateTaskStatus,
     archiveTask,
     getTaskById,
-    getTasksByGroup
+    getTasksByGroup,
+    getAllTask
 
 };

@@ -19,7 +19,7 @@ router.put('/:taskId/archive', authenticateJWT, taskController.archiveTask);
 
 //unused
 router.get('/:id', authenticateJWT, taskController.getTaskById);
-
+router.get('/all/all', taskController.getAllTask);
 
 
 module.exports = router;

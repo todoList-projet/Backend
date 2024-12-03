@@ -97,6 +97,15 @@ const deleteGroup = async (req, res) => {
     }
 };
 
+const getAllGroup = async (req, res) => {
+    try {
+        const groups = await groupService.getAllGroup();
+        res.status(200).json(groups);
+    } catch (err) {
+        res.status(500).json({ error: 'An unexpected error occurred' });
+    }
+};
+
 
 module.exports = {
     createGroup,
@@ -105,5 +114,6 @@ module.exports = {
     updateGroup,
     deleteGroup,
     leaveGroup,
-    getMembersGroup
+    getMembersGroup,
+    getAllGroup
 };

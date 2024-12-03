@@ -2,11 +2,227 @@ openapi: 3.0.0
 info:
   title: Todo API
   version: 1.0.0
-  description: API pour notre application TODOLIST
+  description: API for our TODOLIST application
 servers:
   - url: 'http://localhost:3005'
     description: Development server
 paths:
+  /auth/register:
+    post:
+      summary: User registration
+      description: Registers a new user.
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                first_name:
+                  type: string
+                  example: "John"
+                last_name:
+                  type: string
+                  example: "Doe"
+                email:
+                  type: string
+                  example: "john.doe@example.com"
+                password:
+                  type: string
+                  example: "password123"
+      responses:
+        '201':
+          description: User successfully registered
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 1
+                  first_name:
+                    type: string
+                    example: "John"
+                  last_name:
+                    type: string
+                    example: "Doe"
+                  email:
+                    type: string
+                    example: "john.doe@example.com"
+        '400':
+          description: Bad request
+        '500':
+          description: Internal server error
+  /auth/login:
+    post:
+      summary: User login
+      description: Authenticates a user and returns a JWT token.
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  example: "test1@dauphine.eu"
+                password:
+                  type: string
+                  example: "123456"
+      responses:
+        '200':
+          description: Successful login
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        '401':
+          description: Invalid credentials
+        '500':
+          description: Internal server error
+  /api/groups/all/all:
+    get:
+      summary: Get all groups
+      security:
+        - bearerAuth: []
+      tags:
+        - Groups
+      responses:
+        '200':
+          description: A list of groups
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                      example: 6
+                    name:
+                      type: string
+                      example: "my grp 1"
+                    description:
+                      type: string
+                      example: "grp 1"
+                    nbUsers:
+                      type: integer
+                      example: 1
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Unauthorized"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "An unexpected error occurred"
+  /api/tasks/all/all:
+    get:
+      summary: Get all tasks
+      security:
+        - bearerAuth: []
+      tags:
+        - Tasks
+      responses:
+        '200':
+          description: A list of tasks
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                      example: 1
+                    title:
+                      type: string
+                      example: "Conception de L'application web todo List"
+                    category:
+                      type: string
+                      example: "conception"
+                    description:
+                      type: string
+                      example: "LLorem Ipsum is simply t."
+                    deadline:
+                      type: string
+                      format: date-time
+                      example: "2024-12-04T23:00:00.000Z"
+                    creation_date:
+                      type: string
+                      format: date-time
+                      example: "2024-12-03T06:50:49.000Z"
+                    type:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          example: 2
+                        name:
+                          type: string
+                          example: "Collaborative"
+                    status:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          example: 3
+                        name:
+                          type: string
+                          example: "Completed"
+                    group:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          example: 2
+                        name:
+                          type: string
+                          example: "Groupe 2"
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Unauthorized"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "An unexpected error occurred"
   /api/tasks:
     post:
       summary: Create a new task
@@ -14,13 +230,6 @@ paths:
         - bearerAuth: []
       tags:
         - Tasks
-      parameters:
-        - in: header
-          name: Authorization
-          required: true
-          schema:
-            type: string
-            example: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywiZW1haWwiOiJ0ZXN0M0BkYXVwaGluZS5ldSIsImlhdCI6MTczMzA5MDI0OSwiZXhwIjoxNzMzMTMzNDQ5fQ.Iaxkylaxc4cuzeniBX7qY988N8oFIkTJFjAHmbW_aY4"
       requestBody:
         required: true
         content:
@@ -78,6 +287,926 @@ paths:
                   error:
                     type: string
                     example: "User not found"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "An unexpected error occurred"
+    get:
+      summary: Get all tasks
+      security:
+        - bearerAuth: []
+      tags:
+        - Tasks
+      responses:
+        '200':
+          description: A list of tasks
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                      example: 1
+                    title:
+                      type: string
+                      example: "Conception de L'application web todo List"
+                    category:
+                      type: string
+                      example: "conception"
+                    description:
+                      type: string
+                      example: "LLorem Ipsum is simply t."
+                    deadline:
+                      type: string
+                      format: date-time
+                      example: "2024-12-04T23:00:00.000Z"
+                    creation_date:
+                      type: string
+                      format: date-time
+                      example: "2024-12-03T06:50:49.000Z"
+                    type:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          example: 2
+                        name:
+                          type: string
+                          example: "Collaborative"
+                    status:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          example: 3
+                        name:
+                          type: string
+                          example: "Completed"
+                    group:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          example: 2
+                        name:
+                          type: string
+                          example: "Groupe 2"
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Unauthorized"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "An unexpected error occurred"
+  /api/tasks/personal:
+    get:
+      summary: Get personal tasks
+      security:
+        - bearerAuth: []
+      tags:
+        - Tasks
+      responses:
+        '200':
+          description: A list of personal tasks
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                      example: 1
+                    title:
+                      type: string
+                      example: "Personal Task"
+                    category:
+                      type: string
+                      example: "personal"
+                    description:
+                      type: string
+                      example: "This is a personal task description"
+                    deadline:
+                      type: string
+                      format: date-time
+                      example: "2024-12-04T23:00:00.000Z"
+                    creation_date:
+                      type: string
+                      format: date-time
+                      example: "2024-12-03T06:50:49.000Z"
+                    type:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          example: 1
+                        name:
+                          type: string
+                          example: "Personal"
+                    status:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          example: 1
+                        name:
+                          type: string
+                          example: "Pending"
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Unauthorized"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "An unexpected error occurred"
+  /api/tasks/collaborative:
+    get:
+      summary: Get collaborative tasks
+      security:
+        - bearerAuth: []
+      tags:
+        - Tasks
+      responses:
+        '200':
+          description: A list of collaborative tasks
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                      example: 1
+                    title:
+                      type: string
+                      example: "Collaborative Task"
+                    category:
+                      type: string
+                      example: "collaborative"
+                    description:
+                      type: string
+                      example: "This is a collaborative task description"
+                    deadline:
+                      type: string
+                      format: date-time
+                      example: "2024-12-04T23:00:00.000Z"
+                    creation_date:
+                      type: string
+                      format: date-time
+                      example: "2024-12-03T06:50:49.000Z"
+                    type:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          example: 2
+                        name:
+                          type: string
+                          example: "Collaborative"
+                    status:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          example: 1
+                        name:
+                          type: string
+                          example: "Pending"
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Unauthorized"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "An unexpected error occurred"
+  /api/tasks/archived:
+    get:
+      summary: Get archived tasks
+      security:
+        - bearerAuth: []
+      tags:
+        - Tasks
+      responses:
+        '200':
+          description: A list of archived tasks
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                      example: 1
+                    title:
+                      type: string
+                      example: "Archived Task"
+                    category:
+                      type: string
+                      example: "archived"
+                    description:
+                      type: string
+                      example: "This is an archived task description"
+                    deadline:
+                      type: string
+                      format: date-time
+                      example: "2024-12-04T23:00:00.000Z"
+                    creation_date:
+                      type: string
+                      format: date-time
+                      example: "2024-12-03T06:50:49.000Z"
+                    type:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          example: 3
+                        name:
+                          type: string
+                          example: "Archived"
+                    status:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          example: 1
+                        name:
+                          type: string
+                          example: "Completed"
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Unauthorized"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "An unexpected error occurred"
+  /api/tasks/group/{groupId}:
+    get:
+      summary: Get tasks by group
+      security:
+        - bearerAuth: []
+      tags:
+        - Tasks
+      parameters:
+        - in: path
+          name: groupId
+          required: true
+          schema:
+            type: integer
+            example: 1
+      responses:
+        '200':
+          description: A list of tasks for the specified group
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                      example: 1
+                    title:
+                      type: string
+                      example: "Group Task"
+                    category:
+                      type: string
+                      example: "group"
+                    description:
+                      type: string
+                      example: "This is a group task description"
+                    deadline:
+                      type: string
+                      format: date-time
+                      example: "2024-12-04T23:00:00.000Z"
+                    creation_date:
+                      type: string
+                      format: date-time
+                      example: "2024-12-03T06:50:49.000Z"
+                    type:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          example: 2
+                        name:
+                          type: string
+                          example: "Collaborative"
+                    status:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          example: 1
+                        name:
+                          type: string
+                          example: "Pending"
+                    group:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          example: 1
+                        name:
+                          type: string
+                          example: "Group 1"
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Unauthorized"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "An unexpected error occurred"
+  /api/tasks/edit/{id}:
+    put:
+      summary: Update a task
+      security:
+        - bearerAuth: []
+      tags:
+        - Tasks
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            example: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  example: "Updated Task"
+                category:
+                  type: string
+                  example: "Work"
+                description:
+                  type: string
+                  example: "This is an updated task description"
+                deadline:
+                  type: string
+                  format: date-time
+                  example: "2023-12-31T23:59:59Z"
+                typeTaskId:
+                  type: integer
+                  example: 1
+                groupId:
+                  type: integer
+                  example: 1
+      responses:
+        '200':
+          description: Task updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Task updated successfully"
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Invalid task data"
+        '404':
+          description: Task not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Task not found"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "An unexpected error occurred"
+  /api/tasks/{taskId}/update-status:
+    put:
+      summary: Update task status
+      security:
+        - bearerAuth: []
+      tags:
+        - Tasks
+      parameters:
+        - in: path
+          name: taskId
+          required: true
+          schema:
+            type: integer
+            example: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                statusId:
+                  type: integer
+                  example: 2
+      responses:
+        '200':
+          description: Task status updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Task status updated successfully"
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Invalid status data"
+        '404':
+          description: Task not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Task not found"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "An unexpected error occurred"
+  /api/tasks/{id}:
+    delete:
+      summary: Delete a task
+      security:
+        - bearerAuth: []
+      tags:
+        - Tasks
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            example: 1
+      responses:
+        '200':
+          description: Task deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Task deleted successfully"
+        '404':
+          description: Task not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Task not found"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "An unexpected error occurred"
+  /api/tasks/{taskId}/archive:
+    put:
+      summary: Archive a task
+      security:
+        - bearerAuth: []
+      tags:
+        - Tasks
+      parameters:
+        - in: path
+          name: taskId
+          required: true
+          schema:
+            type: integer
+            example: 1
+      responses:
+        '200':
+          description: Task archived successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Task archived successfully"
+        '404':
+          description: Task not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Task not found"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "An unexpected error occurred"
+  /api/groups:
+    post:
+      summary: Create a new group
+      security:
+        - bearerAuth: []
+      tags:
+        - Groups
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: "New Group"
+                description:
+                  type: string
+                  example: "This is a new group description"
+      responses:
+        '201':
+          description: Group created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Group created successfully"
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Invalid group data"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "An unexpected error occurred"
+    get:
+      summary: Get all groups
+      security:
+        - bearerAuth: []
+      tags:
+        - Groups
+      responses:
+        '200':
+          description: A list of groups
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                      example: 1
+                    name:
+                      type: string
+                      example: "Group 1"
+                    description:
+                      type: string
+                      example: "This is group 1"
+                    nbUsers:
+                      type: integer
+                      example: 10
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Unauthorized"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "An unexpected error occurred"
+  /api/groups/{id}:
+    put:
+      summary: Update a group
+      security:
+        - bearerAuth: []
+      tags:
+        - Groups
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            example: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: "Updated Group"
+                description:
+                  type: string
+                  example: "This is an updated group description"
+      responses:
+        '200':
+          description: Group updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Group updated successfully"
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Invalid group data"
+        '404':
+          description: Group not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Group not found"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "An unexpected error occurred"
+  /api/groups/{id}/leave:
+    post:
+      summary: Leave a group
+      security:
+        - bearerAuth: []
+      tags:
+        - Groups
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            example: 1
+      responses:
+        '200':
+          description: User left the group successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "User left the group successfully"
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "User is not a member of this group"
+        '404':
+          description: Group or user not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Group not found"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "An unexpected error occurred"
+  /api/groups/{id}/members:
+    get:
+      summary: Get group members
+      security:
+        - bearerAuth: []
+      tags:
+        - Groups
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            example: 1
+      responses:
+        '200':
+          description: A list of group members
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                      example: 1
+                    first_name:
+                      type: string
+                      example: "John"
+                    last_name:
+                      type: string
+                      example: "Doe"
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Unauthorized"
+        '404':
+          description: Group not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Group not found"
         '500':
           description: Internal server error
           content:
