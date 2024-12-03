@@ -1,22 +1,11 @@
-// config/swagger.js
 const swaggerJsdoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
+const yaml = require('yamljs');
+
+const swaggerDocument = yaml.load('./src/config/swagger.yaml');
 
 const options = {
-    definition: {
-        openapi: '3.0.0',
-        info: {
-            title: 'Todo API',
-            version: '1.0.0',
-            description: 'API pour notre application TODOLIST',
-        },
-        servers: [
-            {
-                url: 'http://localhost:3005', // Update with your URL
-                description: 'Development server',
-            },
-        ],
-    },
+    definition: swaggerDocument,
     apis: ['./src/routes/*.js'], // Corrected path to your route files
 };
 

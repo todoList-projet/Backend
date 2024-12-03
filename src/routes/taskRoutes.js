@@ -3,6 +3,7 @@ const taskController = require('../controllers/taskController');
 const authenticateJWT = require("../utils/authMidlleware");
 const router = express.Router();
 
+
 router.post('/', authenticateJWT, taskController.createTask);
 router.get('/', authenticateJWT, taskController.getAllTasks);
 router.get('/personal', authenticateJWT, taskController.getPersonalTasks);

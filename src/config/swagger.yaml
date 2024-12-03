@@ -1,0 +1,90 @@
+openapi: 3.0.0
+info:
+  title: Todo API
+  version: 1.0.0
+  description: API pour notre application TODOLIST
+servers:
+  - url: 'http://localhost:3005'
+    description: Development server
+paths:
+  /api/tasks:
+    post:
+      summary: Create a new task
+      security:
+        - bearerAuth: []
+      tags:
+        - Tasks
+      parameters:
+        - in: header
+          name: Authorization
+          required: true
+          schema:
+            type: string
+            example: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywiZW1haWwiOiJ0ZXN0M0BkYXVwaGluZS5ldSIsImlhdCI6MTczMzA5MDI0OSwiZXhwIjoxNzMzMTMzNDQ5fQ.Iaxkylaxc4cuzeniBX7qY988N8oFIkTJFjAHmbW_aY4"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  example: "New Task"
+                category:
+                  type: string
+                  example: "Work"
+                description:
+                  type: string
+                  example: "This is a new task description"
+                deadline:
+                  type: string
+                  format: date-time
+                  example: "2023-12-31T23:59:59Z"
+                typeTaskId:
+                  type: integer
+                  example: 1
+                groupId:
+                  type: integer
+                  example: 1
+      responses:
+        '201':
+          description: Task created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Task created successfully"
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "A collaborative task must be assigned to a group"
+        '404':
+          description: User or group not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "User not found"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "An unexpected error occurred"

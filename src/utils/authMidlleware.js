@@ -9,7 +9,7 @@ const authenticateJWT = (req, res, next) => {
         if (!user) {
             return res.status(401).json({ message: 'Unauthorized' });
         }
-        req.user = user; // Add the user to the request
+        req.user = user;
         next();
     })(req, res, next);
 };

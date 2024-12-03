@@ -1,7 +1,7 @@
 // models/Task.js
 const { DataTypes, Model } = require('sequelize');
 const sequelize = require('../config/db');
-const moment = require('moment'); // Ensure you have moment.js installed
+const moment = require('moment');
 
 
 class Task extends Model {}
